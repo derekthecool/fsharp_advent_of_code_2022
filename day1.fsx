@@ -4,7 +4,7 @@ open System.IO
 let print_advent_information day part =
     printfn "\n\nAdvent of code day %d, part %d results" day part
 
-let lines = File.ReadAllLines("./data/day1_data.txt")
+let lines = File.ReadAllLines("./data/day1.txt")
 
 print_advent_information 1 1
 
