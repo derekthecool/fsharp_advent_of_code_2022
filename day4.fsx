@@ -1,11 +1,8 @@
-open System
-open System.IO
 open System.Text.RegularExpressions
+#load "helper.fsx"
+open Helper
 
-let print_advent_information day part =
-    printfn "\n\nAdvent of code day %d, part %d results" day part
-
-let lines = File.ReadLines("./data/day4.txt")
+let lines = getLinesFromFileByDayNumber 4
 
 let getSequencePairs input =
     let matches = Regex.Match(input, @"(\d+)-(\d+),(\d+)-(\d+)")
@@ -13,15 +10,36 @@ let getSequencePairs input =
     [ set [ (int matches.Groups[1].Value) .. (int matches.Groups[2].Value) ]
       set [ (int matches.Groups[3].Value) .. (int matches.Groups[4].Value) ] ]
 
-print_advent_information 4 1
-
-lines |> Seq.map getSequencePairs |> Seq.iter (printfn "%A")
-// |> Seq.iter (fun line -> printfn "%s" line.Groups[1].Value)
+let isAnyASubsetOfAny (input: list<Set<int>>) =
+    let first = input[0]
+    let second = input[1]
+    let firstCheck = Set.isSubset first second
+    let secondCheck = Set.isSubset second first
+    firstCheck || secondCheck
 
 let A = set [ 1..5 ]
 let B = set [ 4..5 ]
+printfn "Testing function isAnyASubsetOfAny with test datasets A and B. Result is :%b" (isAnyASubsetOfAny [ A; B ])
 
-Set.isSubset B A |> printfn "The value is a subset: %b"
+print_advent_information 4 1
 
+lines
+|> Seq.map getSequencePairs
+|> Seq.map isAnyASubsetOfAny
+|> Seq.sumBy (fun boolSum -> if boolSum = true then 1 else 0)
+|> printfn "Amount of ranges that our full subsets of the other: %d"
 
-Set.isSubset A B |> printfn "The value is a subset: %b"
+printfn "\nSanity check on input data. Maximum value : %d, Minimum value : 0\n" (lines |> Seq.length)
+
+let doAnyOverlap (input: list<Set<int>>) =
+    let first = input[0]
+    let second = input[1]
+    Set.intersect first second
+
+print_advent_information 4 2
+
+lines
+|> Seq.map getSequencePairs
+|> Seq.map doAnyOverlap
+|> Seq.sumBy (fun X -> if Set.isEmpty X then 0 else 1)
+|> printfn "Amount of ranges that have any over lap: %d"
