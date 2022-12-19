@@ -2,11 +2,11 @@ open System.Text.RegularExpressions
 #load "helper.fsx"
 open Helper
 
-let lines = getLinesFromFileByDayNumber 6 |> Seq.head
+let line = getLinesFromFileByDayNumber 6 |> Seq.head
 
 print_advent_information 6 1
 
-let WordMatcher =
+let StartOfPacketMarkerRegex =
     Regex(
         """
     (\w)                       # First char capture, no restrictions
@@ -28,7 +28,59 @@ let WordMatcher =
     )
 
 let firstSequenceOfFourDifferentLettersIndex =
-    WordMatcher.Matches(lines) |> Seq.head |> fun item ->
-        item.Groups["FirstIndexAfterFour"].Index
+    StartOfPacketMarkerRegex.Matches(line)
+    |> Seq.head
+    |> fun item -> item.Groups["FirstIndexAfterFour"].Index
 
-printfn "firstSequenceOfFourDifferentLettersIndex: %A" firstSequenceOfFourDifferentLettersIndex
+printfn "Part 1 answer: firstSequenceOfFourDifferentLettersIndex: %A" firstSequenceOfFourDifferentLettersIndex
+
+/// This regex uses many capture groups
+/// Capture groups higher than 9 can be referenced in two ways with dotnet
+/// regex engine
+/// First: \10
+/// Second: \k<10>
+///
+/// My example using this second method
+/// ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\k<10>|\k<11>|\k<12>|\k<13>|\k<14>)\w)
+///
+/// credit to this website https://www.rexegg.com/regex-capture.html
+/// I love the quote on their
+///
+/// "In practice, you rarely need to create
+/// back-references to groups with numbers above 3 or 4, because when you need to
+/// juggle many groups you tend to create named capture groups. However, if you
+/// spend time in the smoky corridors of regex, at one time or another you're sure
+/// to wonder what is the correct syntax to create back-references to Groups 10
+/// and higher."
+let StartOfMessageMarkerRegex =
+    Regex(
+        """
+    # First letter, no restrictions
+    (\w)
+
+    # Next 13 letters check for totally unique group of 14 letters
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+    ((?!\1|\2|\3|\4|\5|\6|\7|\8|\9|\10|\11|\12|\13|\14)\w)
+
+    # Finally capture the first occurrance after 4 unique
+    (?<FirstIndexAfter14>\w)
+    """,
+        RegexOptions.IgnorePatternWhitespace
+    )
+
+    // First guess of 2062 failed because I forgot the '|' on some groups
+let firstSequenceOf14DifferentLettersIndex = 
+    StartOfMessageMarkerRegex.Matches(line)
+    |> Seq.head
+    |> fun item -> item.Groups["FirstIndexAfter14"].Index
