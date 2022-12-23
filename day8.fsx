@@ -57,6 +57,13 @@ let scanHorizontalByCoordinate (row: int array) =
     |> Array.zip rightToLeft
     |> Array.map (fun (x, y) -> if x <> 0 || y <> 0 then 1 else 0)
 
+let scanVerticalColumns (input:array<array<int>>) =
+    // let doTheWorkare
+    let mutable currentMaximum = 0
+    for column = 0 to (input.Length - 1) do
+        for row = 0 to (input.Length - 1) do
+
+
 scanHorizontalByCoordinate (treeGrid[0])
 |> Array.sum
 |> printfn "Sum of one row %A"
